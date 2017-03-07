@@ -88,7 +88,7 @@ def refresh(request):
         return HttpResponse(status=403)
     if "lastmsg" in request.session:
         if lastmsg == request.session["lastmsg"]:
-            return HttpResponse('no new msg', status=404)
+            return HttpResponse('no new msg', status=304)
         else:
             return HttpResponse(status=200)
     else:
