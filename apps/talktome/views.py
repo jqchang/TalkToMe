@@ -2,6 +2,7 @@ from django.shortcuts import render, HttpResponse, redirect
 from .models import User, Message, Room
 from django.contrib import messages
 from django.db.models import Count
+from datetime import datetime
 
 def index(request):
     request.session['success'] = False
@@ -65,9 +66,34 @@ def chatroom(request):
     if len(rooms) == 0:
         messages.error(request, 'the other user left you')
         return redirect('/success')
+    try:
+        request.session["lastmsg"] = Message.objects.filter(message_room=rooms[0]).order_by("-created_at")[0].created_at.microsecond
+    except:
+        request.session["lastmsg"] = datetime.now().microsecond
     context = {'room': Room.objects.annotate(count=Count('users')).get(id = request.session['roomid']),
                 'user': User.objects.get(id = request.session['userid'])}
     return render(request, 'talktome/chat.html', context)
+
+def refresh(request):
+    if request.method != 'HEAD':
+        return HttpResponse(status=405)
+    if "userid" not in request.session:
+        return HttpResponse('Not logged in', status=401)
+    rooms = Room.objects.filter(id=request.session['roomid'])
+    if len(rooms) == 0:
+        return HttpResponse('the other user left you', status=410)
+    try:
+        lastmsg = Message.objects.filter(message_room=rooms[0]).order_by("-created_at")[0].created_at.microsecond
+    except:
+        return HttpResponse(status=403)
+    if "lastmsg" in request.session:
+        if lastmsg == request.session["lastmsg"]:
+            return HttpResponse('no new msg', status=404)
+        else:
+            return HttpResponse(status=200)
+    else:
+        return HttpResponse(status=200)
+
 
 def makeroom(request):
     if "userid" not in request.session:

@@ -26,9 +26,9 @@
         <div id="thisdiv">
             {% for message in room.messages.all %}
             {% if message.creator == user %}
-            <span id="user"><b>{{message.creator.username}}</b></span>:  {{message.content}}<br>
+            <span id="user"><b>{{message.creator.username}}</b>({{message.created_at|time}})</span>:  {{message.content}}<br>
             {% else %}
-            <span id="otheruser"><b>{{message.creator.username}}</b></span>:  {{message.content}}<br></span>
+            <span id="otheruser"><b>{{message.creator.username}}</b>({{message.created_at|time}})</span>:  {{message.content}}<br></span>
             {% endif %}
             {% endfor %}
         </div>
