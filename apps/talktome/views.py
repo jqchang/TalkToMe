@@ -85,7 +85,7 @@ def refresh(request):
     try:
         lastmsg = Message.objects.filter(message_room=rooms[0]).order_by("-created_at")[0].created_at.microsecond
     except:
-        return HttpResponse(status=403)
+        return HttpResponse(status=204)
     if "lastmsg" in request.session:
         if lastmsg == request.session["lastmsg"]:
             return HttpResponse('no new msg', status=304)
